@@ -1,0 +1,41 @@
+set -euo pipefail
+
+-e : any error wil
+l immediately exit
+-u : will catch any variables that are undefined and exit immediately
+-o : prevents errors in the pipeline from being masked and returns the error code of the command that failed as the error code of the entire pipeline
+
+bash script was successful. Had to learn through trial and error for some syntax parts and logic for what command to use and what format (cat /proc/UPTIME vs uptime)
+----------------------------------------------------
+
+KodeKloud 100 days - Had to copy a file in from the docker host into the running container
+
+-----------------------------------------------------
+
+Bandit:
+- level 20: Had to use nc to open up a port that allowed me to send my password for the previous level (using a pipe). A script in my homedir that has a setuid binary. The script compares a string thats stored there to my password that i sent through the port. If they match, the script sends back the password for the next level. 
+This level was difficult. I didnt know some of the commands at all and had to use Claude to tutor me for this level. I learned more about nc and refined my knowledge on pipeline order. I learnt about & that allows you to run commands in the background without freezing up the terminal. I learnt about tmux that allows you to run multiple separate terminals at once.
+
+level 21: Looked into a cronjob and refreshed my memory on the timing of the cronjobs (order of ops). I learnt that &> takes both stderr and stdout and puts it into the dest file. For this level I followed the paper trail from the cron command to the final file that stored the next level's password.
+
+-------------------------------------------------------
+
+/proc - this is a filesystem that is for providing info about the kernel's state as readable files. This filesystem exists in memory and not on disk, the kernel creates and populates in during runtime. If you access one of the files (using cat for example), the kernel generates that info on the spot and returns it. This is essentially commands desguised as a filesystem, the files are technically empty until they are accessed by something.
+I learnt that many common commands fetch their info from proc and proccess the info to make it more user-friendly.
+/proc/meminfo - data about the memory usage in the machine and details exactly whats being allocated where.
+meminfo vs free -h : meminfo provides much more info for the memory usage of the machine vs free which only details RAM memory and swap files space.
+free actually reads from meminfo and processes the data to a more user friendlier version.
+
+/proc/cpuinfo - similar to meminfo but for the CPU. Provides detailed breakdown of the CPU including name, specs etc...
+
+/proc/loadavg - sums up the system's load using 5 fields:
+1. load in 1 min avg (processes running or in CPU ready) 
+2. load in 5 min avg
+3. load in 15 min avg
+4. running/total (threads)
+5. most recently created PID
+
+/proc/uptime -
+1. seconds since boot as a float
+2. total CPU idle time (all of the cores combined) since boot as a float
+
