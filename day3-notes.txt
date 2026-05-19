@@ -1,0 +1,14 @@
+ Kodekloud:
+ Devops- had to pull an image from the global repository and then tag it. Was easy 
+ Linux - had to set up a postfix mail server with devcote. Didnt know what that was and I used Claude to tutor me on it. Figured out after an hour that it was a waste of time and after 2 fails decided to drop the task.
+ 
+ Bandit 22- had to access a cronjob and traced the file that was a shell script. It hashed the user (next level's user) using md5 and put the password in a file in /tmp/hashed_username 
+ Bandit 23 - accessed a cronjob that goes into a specific directory, looks for files with ownership for bandit23 and executes them, while deleting every file/dir/sub-dir in the directory. This script runs as bandit24 an to access his password I copied a custom shell script into the dir that copied the password of bandit24 into a file which I have access to.
+ It was hard at first to understand the concept of the permissions and the cronjob syntax. I tried creating the script and encountered a bunch of errors such as: incorrect placement of the file, missing permissions and syntax errors. After debugging and fixing I got it done!
+ -----------------------------------------------------------------------------------
+ 
+ FHS- Didnt do today
+ 
+-------------------------------------------------------------------------------------
+
+Main theme- didnt do today
