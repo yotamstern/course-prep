@@ -1,0 +1,48 @@
+Main Event- 
+
+
+Breaking and logs:
+
+May 20 14:50:01 DESKTOP-SBHAJN3 CRON[3336]: pam_unix(cron:session): session opened for user user(uid=1000) by user(uid=0)
+May 20 14:50:01 DESKTOP-SBHAJN3 CRON[3338]: (user) CMD (/home/user/sigitprep/sysreportw.sh >> /tmp/sysreport.log 2>&1)
+May 20 14:50:01 DESKTOP-SBHAJN3 CRON[3336]: pam_unix(cron:session): session closed for user user
+This error message looks like there was a typo in my original file since it doesnt exist. 
+
+/bin/sh: 1: /home/user/sigitprep/sysreport.sh: Permission denied
+This error means that the file is missing executing permissions. need to chmod +x to fix it. I would have though about sudo aswell since the permissions problem could have been becuase the current user isnt able to run the script.
+
+
+/home/user/sigitprep/sysreport.sh: line 75: syntax error near unexpected token `{'
+This error is for a typo in the script. I broke the script on purpose but I didnt know why I didnt see any error message about it. Then I realized that the X permission wasnt reset properly and that the system couldnt execute the script. So once I changed that the syntax error appeared.
+
+
+I learned from this lesson that there are multiple ways of debugging errors with crontabs running a script. It can be a cron problem (file doesnt exist), a problem inside the script (syntax error) or a permission problem.
+Each one could be found in a different place. For example: The syntax error is found in the error file that we appended the stderr from the script into since cron ran the script but the problem was the script itself. 
+The permissions problem was found in the same file aswell since it couldnt run the script therefor the stderr was put into the log file.
+The "file is not found" error was found in the journalctl -u cron. Since the problem was on the cron level.
+
+------------------------------------------------
+
+KodeKloud:
+DevOps - Had to create an image from a running container. I though I had to use docker build but instead it turned out to be docker commit. 
+
+-----------------------------------------------------
+
+FHS: 
+
+/var/log - directory with dynamic log files for different parts of the system.
+
+/var/log/syslog - log file that logs processes and services in the system. Good use for debugging scripts that run for example.
+ 
+/var/log/auth.log - logs the different connections made on the machine that required authentication, sudo actions, and security events
+
+/etc/cron.d - a cron directory for system level cronjobs. Usually for cronjobs of specific programs and not for user cronjobs like what I did earlier. 
+
+/etc/cron.daily -a dir that executes the scripts on it at a specific time each day. The system decides at what time.
+
+---------------------------------------------------------
+
+Bandit 24 : 
+
+Had to send the previous level's password plus a 4 digit combo to a port on local host that will give me the password for the next level. I had to bruteforce this one. I created a shell script that looped through and bruteforced the combos. I had some trouble with setting up the connection to the port. At first I opened a new connection at every send and I didnt realize that they specifically said not to do that. I then didnt know where to open the connection and how to send the data. After some looking up online, I found that I had to pipe the connection after the for loop.
+I was extremely close to solving this without any help at all! Progress!
