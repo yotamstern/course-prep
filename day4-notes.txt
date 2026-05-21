@@ -1,0 +1,54 @@
+KodeKloud - Had to install and configure apache on a running container. Had to learn how to use docker exec and how to navigate the terminal inside the container. I feel way better at navigating the file system because I automatically knew that the config files for apache are supposed to be in /etc/apache2. I had to learn though which file to edit but after that I was good.
+
+---------------------------------------------------------------------------
+
+Main Event-
+
+1. ip a :Show every network interface on this machine and its IP address.
+2. traceroute [ip address/dn] :allows you to see the path from local host to a defined ip address or dns name for example.
+3. nslookup/dig [domain name] :a way to find IP addresses of a domain name. One would use nslookup for a simpler display and dig is used more for diving deep because more info is shown.
+4. curl -v [http://example.com] :a way to reach websites from the terminal and access their content in html format. the -v shows everything: full request,response headers etc. The -v is recommended for debugging  
+5. ss -ta :shows all tcp connections, not just listening ones. The -t is for TCP and -a is to show all. 
+6. ss -tlpn :shows all tcp connections that are in a listening state and shows the processes that are using them. The -t is for TCP, -n is to show the actual port numbers and not the service names, -p is to show the processes using the connection, -l for listening.
+7. ip route show :displays the kernel's current IP routing table
+
+Step 2: Setting up a server and listening to it.
+
+python3 -m http.server :creates a python built-in http server of my current dir
+
+ss -tlnp == LISTEN  0       5               0.0.0.0:8000        0.0.0.0:*      users:(("python3",pid=3351,fd=3)) 
+as you can see the server is a process with a prcoess id of 3351 and connecting to port 8000 that accepts any connection (0.0.0.0) 
+
+I accessed the server using curl -v localhost:8000 and saw the contents of my directory (the names of the files etc) and the other infomation on the page (html configs) and the tcp connection.
+I also tried to access the server from my google browser and it worked. Very cool!
+
+The flow of the connection is the following:
+- hostname and port was resolved into an IP address
+- The host tries to connect to the port. 
+- A connection is made fro localhost to the server.
+- The configs + body of the page was displayed.
+
+Building a connection between two localhost terminals using nc:
+
+I found a website that explained that you have to do nc -l -p 1299 to listen to this specific port (make sure the port isnt taken). Then on the other terminal connect to the port by doing nc localhost 1299.
+After that I could perform a sort of chat between the terminals.
+
+Second step was to have 1 terminal as the server and the second as a client. The server sends a file through the port and the client recieves and retrieves the file. I had trouble understanding this part at first. I though I had to display the file contents on the client side. After rereading the task, I just had to retrieve the file which meant that I have to rename the file a different name since we are on local host and that wouldnt really show that the file got sent through.
+Commands:
+ nc -l -p 1234 < day2-notes.txt
+ nc localhost 1234 > day2-copy.txt
+ 
+To solve this I looked online on how to use netcat for this scenario. The real problem was the understanding of the task itself. Note to self: Read the task properly before attempting, It'll save you time.
+
+---------------------------------------------------------------------
+
+FHS: 
+
+/etc/resolv.conf :configs the DNS resolver
+/etc/hosts :maps hosts to IP address locally
+/etc/services :maps services to ports/protocol (udp/tcp)
+
+/proc/net :directory that displays network processes and info about them (info about active connections and their states)
+
+/proc/net/tcp :displays active tcp connections and info about them.
+
