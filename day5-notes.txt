@@ -1,0 +1,100 @@
+Main Event:
+
+1. wireshark/tcpdump/tshark :allows me to capture live packer traffic. Wireshark is the GUI product and allows comprehensive analysis, more than tshark and tcpdump. tshark is the CLI version of wireshark. tcpdump is the simpler, terminal version thats available on most machines without additional installation, even though I had to install tcpdump on my machine.
+2. tcpdump -i lo port 8000 :I learned about the loopback interface that allows the servers on the same machine to loopback the traffic instead of sending it out and back in when they want to contact a different service on the same machine. -i is the inteface, lo is localhost, and port 8000 is the filter to listen only on that port.
+3. tcpdump -A -i lo port 8000 :Same command as before but with a -A to display the packet content and not just the header.
+4. tcpdump -nn -i lo port 8000 :the -nn is to drop the DNS and port number resolution
+
+This part took me longer than expected because I was procrastinating it. I only had to use tcpdump out of the 12 options Claude gave.
+
+TCP handshake:
+`..3...@.................................@.Z.....1.{P.......
+18:23:45.608683 IP 127.0.0.1.36108 > 127.0.0.1.8000: Flags [S], seq 1162366991, win 65495, options [mss 65495,sackOK,TS val 1150291673 ecr 0,nop,wscale 7], length 0
+E..<..@.@..............@EHP..........0.........
+D...........
+18:23:45.608739 IP 127.0.0.1.8000 > 127.0.0.1.36108: Flags [S.], seq 907876804, ack 1162366992, win 65483, options [mss 65495,sackOK,TS val 1150291673 ecr 1150291673,nop,wscale 7], length 0
+E..<..@.@.<..........@..6...EHP......0.........
+D...D.......
+18:23:45.608757 IP 127.0.0.1.36108 > 127.0.0.1.8000: Flags [.], ack 1, win 512, options [nop,nop,TS val 1150291673 ecr 1150291673], length 0
+E..4..@.@..............@EHP.6........(.....
+D...D...
+
+The [S] is the syn request. The [S.] is syn+ack, and [.] is the ack.
+
+18:23:45.609138 IP 127.0.0.1.36108 > 127.0.0.1.8000: Flags [P.], seq 1:79, ack 1, win 512, options [nop,nop,TS val 1150291674 ecr 1150291673], length 78
+E.....@.@..............@EHP.6........v.....
+D...D...GET / HTTP/1.1
+Host: localhost:8000
+User-Agent: curl/8.18.0
+Accept: */* 
+
+This part is after the 3 way handshake the request uses [P.], still uses the ack of the connection and the P symbolizes the push of the HTTP content.
+The second part is the GET. GET is the client requests to read content (HTTP specifically), POST if it was to send. 
+Accept */* means the client is willing to accept all types of formats for the data.
+
+The TCP teardown:
+
+
+18:23:45.617269 IP 127.0.0.1.8000 > 127.0.0.1.36108: Flags [F.], seq 1359, ack 79, win 512, options [nop,nop,TS val 1150291682 ecr 1150291682], length 0
+E..41.@.@..5.........@..6...EHP^.....(.....
+D...D...
+18:23:45.617717 IP 127.0.0.1.36108 > 127.0.0.1.8000: Flags [F.], seq 79, ack 1360, win 575, options [nop,nop,TS val 1150291682 ecr 1150291682], length 0
+E..4..@.@..............@EHP^6......?.(.....
+D...D...
+18:23:45.617765 IP 127.0.0.1.8000 > 127.0.0.1.36108: Flags [.], ack 80, win 512, options [nop,nop,TS val 1150291682 ecr 1150291682], length 0
+E..41.@.@..4.........@..6...EHP_.....(.....
+D...D...
+
+Both the server and client send a finish+ack [F.] that symoblizes the end of the connection and that there is no more data to send/recieve. Then the server sends a [.] that acks the closing request of the client.
+The flow is: Server [F.] -> Client [F.] -> Server [.]
+
+The 3 step handshake is 3 requests long because you need to ack both client and server and request a syn for both sides. It cannot be possible in less than 3 requests.
+
+
+Situation Exercise: Run a service and client model on localhost and then capture the packets travelling from the two sides.
+
+I used:
+Client- nc localhost port 8000
+Service- nc -l -p 8000
+Packet sniffer- tcpdump -nnA -i lo port 8000 .I used nn for best practice and A to display the contents of the packet (http)
+
+root@DESKTOP-SBHAJN3:~# tcpdump -nnA -i lo port 8000
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on lo, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+00:21:39.853636 IP 127.0.0.1.36822 > 127.0.0.1.8000: Flags [P.], seq 968814145:968814151, ack 4119621731, win 512, options [nop,nop,TS val 2154022985 ecr 2153965408], length 6
+E..:37@.@.      ............@9..A..pc...........
+.c.I.b.`hello
+
+00:21:39.853747 IP 127.0.0.1.8000 > 127.0.0.1.36822: Flags [.], ack 6, win 512, options [nop,nop,TS val 2154022985 ecr 2154022985], length 0
+E..4D.@.@............@....pc9..G.....(.....
+.c.I.c.I
+
+
+As you can see, there was a push+ack flag from the client (on port 36822) to the service (on port 8000) with the message content being 'hello'
+The corresponding packet was an ack packet from the service to the client that means that he accepted the packet.
+I learned that the ack flag is mandatory after a tcp connection in order ot acknowledge the connection with the service and everything it has sent so far. 
+
+In order to make sure that the payload cannot be sniffed by a third party, I could use a tls/ssl encryption or use SSH instead of nc to have a secure connection.
+
+------------------------------------------------------------------------------------------------------------
+
+FHS:
+
+
+1. at /etc/netplan , the directory was empty though
+2. /proc/net/route , displays the kernel's ipv4 routing table dynamically once accessed.
+3. /etc/nsswitch , displays the order of how the OS resolves things like passwords, hostnames, networks, protocols etc. For hostnames it first looks at /etc/hosts file and then at the DNS resolver.
+
+-------------------------------------------------------------------------------------------------------------
+
+Networking Checkpoint
+
+1. 4/5 I felt pretty confident using the tools like ss,nc,tcpdump. I had an easy time understanding the TCP lifecycle and finding the key parts of the packets like the three-way handshake flags. This felt like a good intro into networking in Linux. We touched on the basics pretty well and I got them down. We didnt do anything too complex and I felt like some tasks repeated themselves, especially with the packet sniffing, but overall it was good and I learned quite a bit from these two sessions.
+2. The TCP lifecycle start with establishing a connection between two sides: server and a client (most times). The client sends a SYN request to the server, server responds with a SYN and an ACK, then the client ACKs the connection and then they can communicate. Each time one side communicates with the other (wants to send a HTTP payload) it does PUSH+ACK request. The ACK is mandatory for each request during the session after the three way handshake to acknowledge that the side has acknowledged all of the previous requests. The receiving side then ACKs the request. When the disconnection happens (teardown), the client sends a FIN + ACK (ack here is mandatory becuase of the earlier rule), the server sends a FIN+ACK aswell, then the client ACKs and then the connection closes.
+3. Maybe do a review on the very essential tools like nc, ss, or anything else that you think I will need to use or know for the course.
+
+----------------------------------------------------------------------------------------------------------------
+
+No bandit today, will do tomorrow.
+
+
