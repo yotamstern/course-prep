@@ -1,0 +1,25 @@
+Kodekloud - 
+Had to create a docker network. 
+
+------------------------------------
+Bandit-  
+Did level 25. Was pretty confusing to understand that more closes once the text is displayed is displayed fully.
+
+----------------------------------
+
+FHS- 
+.git/HEAD - points to what commit the HEAD is at
+.git/refs - points to human readable aliases of commit hashes.
+.git/objects - points to commits in hex format that leads to their commit hash.
+.git/logs - is the log dir for the different branches and their commits. 1 main file for the HEAD + a sub directory for the sub branches.
+-------------------------------------------
+
+Main event- 
+
+Part A: Did the exercies on the learngitbranching site and quickly picked up on it. 
+Part B: Did the 3 exercise and felt like I was actually learning and getting my hands dirty in my own directory. I have to admit that I used AI to explain to me for some commands but I felt like I was in control and present and not just following instructions.
+Part C: For this part, to get the 3 commit branch I would do the following:
+1. git rebase -i HEAD~6 -> opens up the last 6 commits and allows me to order,drop,change the commit message using a GUI.
+2. My teamate already based work on my previous 6 commit branch, he might encounter a merge conflict, a file that is missing since it was dropped, and the commit message of C5 has changed- He's cooked pretty much. After the rebase, Git creates new hashes for the commits and changes so the C5 on my new branch is unrelated to his C5. If he tries to push his changes he will get a massive merge conflict. 
+
+
