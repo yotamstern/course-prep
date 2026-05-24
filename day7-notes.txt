@@ -20,7 +20,6 @@ Part C was tough. Part D I didn't do today because the previous parts took too l
 
 FHS- 
 
-.git/config - contains the basic git configs for my repo and it defines what is the url of the remote repo.
+.git/config - contains the basic git configs for my repo and it defines what is the url of the remote repo. it also stores the tracking relationship between your local branch and the remote branch 
 
-.git/refs/remotes/ - contains objects of the remote repo -> leads you to the path that leads to their hashes.
-
+.git/refs/remotes/ -  this directory contains your remote-tracking refs — one file per tracked remote branch, and each file contains a single commit hash. That hash is where the remote branch was pointing as of your last fetch. It's not the remote's objects — the objects themselves live in .git/objects/ regardless of whether they came from local work or a fetch.
