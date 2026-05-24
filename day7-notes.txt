@@ -1,0 +1,26 @@
+KodeKloud- easy exercise today, had to do some port mapping on a container, took me 3 minutes.
+
+---------------------------------------------------------------------------
+
+Bandit- 
+
+Didn't do. Want to switch to something else for Linux 
+
+---------------------------------------------------------------------------
+
+Main Event
+
+learngitbranching: did almost the whole thing, some exercises were harder than others and I spent quite a lot of time on it to grasp the concepts. I can confidently say that I now know the basics. 
+
+git bisect: a command to help find bugs from previous commits using a binary search. You provide the command an example of a good commit and a bad one and it and the command uses that to find the first commit that introduced the bug. Since it uses binary search it'll run in log(n) time. This command is powerful because it makes finding a bad commit easier and faster and automates the process.
+
+Part C was tough. Part D I didn't do today because the previous parts took too long. In part C I though I messed up because I had a messy branch and I had to do the part of making the local and origin/remote branch have different commits and then handle it. I did git pull --rebase that put my commits on top of the origin's while keeping my commit branch linear and clean and then git push. While doing this I tried to visualize how it would look in on the learngitbranching website, which got hard at some point. I am taking away from today and from the Git section in general that I need to put more emphasis on logs. Today some answers that I needed came from just reading the logs and knowing what to do next. I would definitely do some more git revision before the course. 
+
+---------------------------------------------------------------------------
+
+FHS- 
+
+.git/config - contains the basic git configs for my repo and it defines what is the url of the remote repo.
+
+.git/refs/remotes/ - contains objects of the remote repo -> leads you to the path that leads to their hashes.
+
