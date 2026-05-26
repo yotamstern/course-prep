@@ -1,0 +1,43 @@
+notes from the Elastic visit:
+
+-Dont be worried about the placements in the course. Everything is good and intresting.
+-The course will demand me to be able to come across something that I dont know, and quickly look it up (No AI) and figure out how to deploy it. 
+-K8s and Docker; recommended to know well- the theory but more importantly learn the theory but also by hands on experience 
+-Linux is the base for everything (use man)
+-Networking and OSI layers
+-The course doesnt expect me to be prepared
+-He asked me what's a stateful set and I didnt know off the top of my head. He said that most of the information will be easier to know if I used it practically and dont just remember off the textbook.
+-----------------------------------------------------------------------------------------
+
+Main Event: Today was an interesting day. A lot of trial and error as you can see from the chats with Claude. Some things I had to get used to in python and I know I learned a lot today, how to handle list and dictionaries, how to write efficient code and got some rust off. The main lesson from today was how to learn on the fly. Looking at documentation, self experience with trail and error and having the ability to look at the bugs and debug. I wasn't perfect but it was progress.
+
+-----------------------------------------------------------------------------------------
+
+/usr/lib/python3/dist-packages : The file that stores the packages that are built in for python for the Linux distro.
+
+/usr/bin/python3 : This file is the pointer to the python engine of my machine. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
