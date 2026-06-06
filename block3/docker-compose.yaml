@@ -1,0 +1,24 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:5000"
+    depends_on:
+      - db
+    networks:
+      - frontend-net
+      - backend-net
+
+  db:
+    image: redis:alpine
+    networks:
+      - backend-net
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
+
+networks:
+  backend-net:
+  frontend-net:
