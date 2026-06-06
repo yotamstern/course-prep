@@ -1,0 +1,16 @@
+Kodekloud:
+
+Had to write a Dockerfile for a python app and then build/run the container. Pretty basic. 
+Had to do docker tag on an image. Very easy 
+------------------------------------------------------------------------------------------
+
+Main Event:
+
+Had to figure out how to connect two different services using docker compose. I was given basic instructions only. I have to admit that I used AI to help me understand the task more and I used documentation for the python app code. I also learned about env variables and how to use them in docker. I connected a python flask app that keeps track of times that the app was accessed via a counter thats stored on a redis instance. I had trouble in the beginning and I couldn't figure out what was the problem. Eventually after debugging with Gemini I figured out that I didn't configure the name of the redis service correctly in the docker compose and thats why curling into the port on local host provided no output. I learned that by looking at docker compose ps to see what containers are running and that how I saw that in my code the service name for the DB wsant the same as in the docker compose. Afterwards, I learned more about docker volumes and how by removing them, the container loses its volatile data (since its ephemeral) and therefore it loses the counter's progress. I also played around with how services work in Docker. Once I connected each sevice (app and db) to a separate network on the docker host, the containers couldn't communicate to each other. In order to solve that I used the multihoming method and added the DB's network name to the app's networks.
+
+
+-----------------------------------------------------------------------------------------
+
+FHS was very hard to find the right files. I automatically though to check /var/lib/docker-desktop since its intuitive but it was empty.
+
+
