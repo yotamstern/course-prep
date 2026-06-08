@@ -1,0 +1,17 @@
+KodeKloud:
+
+First days doing k8s. It took me a while to get used to the syntax and the commands. I mostly used --help and if I really needed help I used Google to find the correct syntax/command. I did the 100 days challenge and I did 3 hands on k8s labs that taught me about the pods, replicaSets and basic functions in a single node cluster. I got comfortable writing YAML and understanding the why behind what I'm declaring. 
+Tomorrow I'll complete the final 3 labs. I expect them to take me 1-1.5 hours to complete.
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+Python:
+
+I did the Ch3 that focused on Exceptions. I attached the files on that aswell. 
+Took me like 1.5 hours.
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+FHS:
+
+Couldn't do it since I dont have the k8s system on my machine and I've only been doing exercises in a lab. 
+
+
