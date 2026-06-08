@@ -1,0 +1,37 @@
+KodeKloud:
+
+Had a k8s challenge on the schedule for the 100 days of devops so I am waiting on it for tomorrow.
+Did an additional docker challenge as my linux practice and I just had to add a user to the docker group so that it will have the ability to use docker without sudo.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Main Event:
+
+I dedicated most of my time in python. I did Chapter 0+1 and the difficulty today was getting back into the flow of things in python. I was tasked with mini coding challenges (Attached the python files in the git).
+Overall, I think I got alot out of today's session in terms of python. I feel like I got better.
+
+
+Docker:
+
+1. I will change a variable or make a mistake in the web container that will force it to crash. Following the crash I predict that the error code will be (1) which is an application erro that means that the container crashed on runtime due to bad syntax in this case. Ill look in docker log [container name] and docker ps -a to diagnose from the outside of what happened and I'll proceed from there.
+
+First change: I made a typo in the image that the web service uses. 
+This is the error: user@DESKTOP-SBHAJN3:~/sigitprep/block3$ docker compose up --build -d
+services.web.build must be a string
+Pretty straight forward.
+
+I then realized that a syntax error is not a runtime, but a buildtime error. This means that docker stops the build process if the syntax is wrong.
+
+Second change: In the CMD inside the Dockerfile, I changed the word "run" to "runner", during the build process docker thought it was a valid command but when the command actually ran, it returned back that "runner" is not an argument and suggested maybve I meant to use"run". I looked at docker ps and the command part said "flask runner", I could have caught up to my mistake there aswell. Additionally, I noticed that the error code is (2) which indicates a syntax error/ invalid args inside a container.
+
+2. I will separate the two services into two different networks with their own unique names. I predict that the services wont be able to communicate with one another since each network in Docker is isolated from another network. I ran the docker compose up and got into the web container with exec -it. I ran getent hosts db to see if there is a DNS resolution for the db service on the web container and the output came empty. This means that the problem is in layer 3/4 but it looks as if its layer 7 due to it being DNS related.
+No error codes since the containers were running properly, they just couldn't communicate with one another.
+The solution is to use multi-homing and connect the web service to the backend-net aswell to allow communication. Best practice is to use a reverse proxy like nginx.
+
+3. I will remove the volumes in the docker compose file. I predict that this will lead to the counter being reseted each time the container will start back up. Containers are ephemeral and dont save the data from the writable layer unless they are bind or volume mounted. Results were as expected. No error code. 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Today was mixed into a noon and a late night sesh. I just finished for today and the current time is 3:44 AM. I didnt do FHS and the unguided problem because of the time. No ned to circle back on it later. I felt like I did enough today since the python took way longer than expected and thats totally fine. Im thinking to myself, "Why am I putting so much work into prepping for the couse if I've been told that there is no need to prep?" I have this addicted type of feeling where I want to succeed and along the way I'm actually enjoyinglearning these topics and it's not feeling like a chore to me. So yeah, I have zero regret in what I'm doing. 
+
+
+ 
