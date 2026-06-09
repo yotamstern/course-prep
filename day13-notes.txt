@@ -1,0 +1,29 @@
+KodeKloud:
+
+100 Days: Created my first deployment. Used k8s documentation from their website for reference for the syntax. 
+K8s Labs: Completed the 3 labs in around 45-60 min. Was pretty easy and I learned about rollouts and updates and how they work behind the scenes. I learned about the difference between rolling updates and recreate. I learned about the syntax for k8s services and how to create a NodePort service. Other than that I didn't cover much. I really enjoyed those hands on labs and I think I learn best by doing those types of drills.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Python:
+
+Completed the OOP part of the course. It was relatively easy for me because I took a course in OOP in Java so most of the difficulty was figuring out the syntax that's python specific. I have the concepts downthough (for the most part).
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+FHS:
+
+The difference between /etc/reslov.conf on WSL and on a k8s cluster.
+
+
+controlplane /etc ➜  cat  ./resolv.conf 
+search 5cpiv7fgyty5zt24.svc.cluster.local svc.cluster.local cluster.local
+nameserver 10.96.0.10
+options ndots:5
+
+
+user@DESKTOP-SBHAJN3:~$ cat /etc/resolv.conf
+nameserver 10.255.255.254
+search home
+
+
+This file in general acts as the config file for the DNS resolver. In regular Linux, it points to the proxy of the windows host that acts as the DNS server. The home is the domain in which the proxy search in for the DNS resolution. In k8s, the name server is probably the CoreDNS which acts as the DNS resolver in the control plane. Since k8s is more focused on cluster forwarding and less on external traffic forwarding, it configed ndots:5 which means that it prioritzes internal cluster routing first.
+
