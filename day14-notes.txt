@@ -1,0 +1,43 @@
+Cold Deployment:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: first-deployment
+  labels:
+    app: first
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: first
+  template:
+    metadata:
+      labels:
+        app: first
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+--------------------------------------------------
+Main Event:
+
+
+1. I wrote the PVC and the pod that claimed the volumes by using k8s documentation. I understood the concept. 
+The storage is split into PV + PVC because PV is the storage volume thats provisioned beforehand that k8s can use (in general I didnt have to write the PV and k8s handled it for me) and the PVC is the claim to the actual storage. The reason that there is this decoupling is to allow there to be multiple PVCs and allow for scalability on that end. You can imagine the PV as a pool of storage and the PVC is an object that takes some space in the pool.
+
+
+2. A Stateful is an object that allows there to be a consistent identity of a specific pod in the cluster. For example, you would like to manage a pod with a writeable container to a DB. A stateful set would allow you to have a consistent ID, resources and PVC to this pod, even if the pod were to crash, k8s would boot up the same exact one up. It's like in a locker room where a person has it's own locker with his name, clothes, location etc. If the person left the room, he would return to the same locker with his stuff being the same. A deployment doesn't care what the identity of the pod. Once it crashes it would boot up a pod with a different identity. Its like imagining a person leaving the locker room and then returning to a different locker.
+
+Overall, I am starting to learn how to write YAML but it's still not easy for me to remember the syntax.
+--------------------------------------------------------
+Python:
+
+Finished half of the generators.
+
+--------------------------------------------------------
+SadServer:
+
+Did the "Bilbao": Basic K8s problem. I need to use the clues in order to understand. The problem was that the node selector didnt match the labels sort of so I removed the node selector. I the pods also had a memory limits to them so I removed those too in order of the pod to run correctly and to connect to the nginx load balancer.
+
+
