@@ -1,0 +1,26 @@
+KodeKloud:
+
+k8s: Had to edit a deployment for a rolling update strategy to change an image version
+
+------------------------------------------------------------------------------------------
+Python: 
+
+Completed Ch4
+
+-------------------------------------------------------------------------------------------
+FHS: 
+
+Active recall: 
+
+- /etc/fstab : The main config file for mounting the main filesystems at boot.
+
+- the /var/log is a directory that stores different system-level event log files. Very usefull for debugging on systemlevel
+
+
+---------------------------------------------------------------------------------------------
+Today I was very busy with life (family,friends etc)
+
+This is the most I could do. I tried squeezing Ch5 in python at night but I was very tired and I didnt see myself reaping any benefit from it. 
+
+
+
