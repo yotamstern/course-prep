@@ -1,6 +1,6 @@
 KodeKloud: 
 
-Had to revert a deployment that utilizes rollingupdates. It was a matter of one command that reverted the deployment 'kubectl revert'
+Had to revert a deployment that utilizes rollingupdates. It was a matter of one command that reverted the deployment 'kubectl rollouts undo'
 I also did a docker challenge where I had to write a basic dockerfile for an apache2 server that also had to change the /etc/apache2/ports.conf file (know the location now on automatic)
 
 ----------------------------------------------------------------------------------------------------------------------
