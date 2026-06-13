@@ -1,0 +1,21 @@
+KodeKloud: 
+
+Had to revert a deployment that utilizes rollingupdates. It was a matter of one command that reverted the deployment 'kubectl revert'
+I also did a docker challenge where I had to write a basic dockerfile for an apache2 server that also had to change the /etc/apache2/ports.conf file (know the location now on automatic)
+
+----------------------------------------------------------------------------------------------------------------------
+Python:
+
+Just did the hangman
+
+
+----------------------------------------------------------------------------------------------------------------------
+SadServers:
+
+Did a Docker problem called "Salta"
+It had a problem with the Dockerfile that had some mistakes in the configs of the cmd, expose part (I know its moslty for documentation but still). I fixed the file, built the image and ran the container with the proper port mapping. I then encountered an issue where another process was listening to the same port. I then had to kill that process. I forgot how to use ss -tulpn so I looked up how to use it and find the process ID that I was looking for. I then killed the process and ran 'docker start'. It worked.
+
+------------------------------------------------------------------------------------------------------------------------
+
+Another busy day with life and other activities and this is the best I could do. I squeezed in good quality work today with the time that I had.
+
