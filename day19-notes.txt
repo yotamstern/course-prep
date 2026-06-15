@@ -1,0 +1,209 @@
+========================================================================
+DAY 19 NOTES — K8s NETWORKING & RBAC TROUBLESHOOTING
+June 15, 2026
+========================================================================
+
+
+========================================================================
+PART 1 — K8s NETWORKING: THE "THREE LINKS" FRAMEWORK
+========================================================================
+
+When a pod can't reach a ClusterIP service by name, walk the path IN ORDER
+and the first broken link is the problem:
+
+  1. DNS link (name -> ClusterIP). Does the service name resolve? Test from
+     inside a pod (curl / getent the service name). "Could not resolve host"
+     = failure here (L7 / DNS). If it resolves, the problem is deeper.
+
+  2. Endpoints link (ClusterIP -> pods). Run: kubectl get endpoints <service>
+     Empty list = the Service exists but selects no pods. Almost always a
+     selector/label mismatch. This is the most common real K8s networking
+     failure.
+
+  3. Pod link (endpoint -> running pod). Run: kubectl get pods
+     Is the target pod actually Running/Ready and listening on the expected
+     port?
+
+DURABLE ONE-LINER:
+  "When something can't talk in a cluster, walk three links — does the name
+   resolve, does the Service have endpoints, is the pod healthy — and the
+   first broken link is the problem."
+
+------------------------------------------------------------------------
+Docker -> K8s networking bridge (corrected)
+------------------------------------------------------------------------
+- Docker: embedded DNS maps a service name DIRECTLY to one container's IP.
+  Workable because a Compose service is usually a single, fairly stable
+  container.
+- Kubernetes: a Service name resolves (via CoreDNS) to a ClusterIP — a
+  STABLE VIRTUAL IP that LOAD-BALANCES across many pod IPs. The middleman
+  exists for two reasons Docker's direct-mapping doesn't need:
+    (1) pods are ephemeral, IPs churn, and
+    (2) a Service fronts multiple replicas and spreads traffic across them.
+- The ENDPOINTS (link 2) ARE the list of pod IPs the ClusterIP balances
+  across. That's why an empty endpoints list = a name pointing at nothing.
+
+------------------------------------------------------------------------
+resolv.conf connection (from Day 13)
+------------------------------------------------------------------------
+Inside a pod, /etc/resolv.conf shows:
+    nameserver <CoreDNS ClusterIP>
+    search ...svc.cluster.local
+    options ndots:5
+The search suffixes are why a bare service name resolves — the resolver
+appends .<namespace>.svc.cluster.local and asks CoreDNS.
+
+------------------------------------------------------------------------
+Layer-triage drill done
+------------------------------------------------------------------------
+Broke the Service by mismatching the selector -> name still resolved (DNS
+fine, ClusterIP still exists) but traffic didn't land (zero endpoints).
+Diagnosed via `get endpoints` showing an empty list. Fixed by realigning
+selector <-> pod labels.
+
+
+========================================================================
+PART 2 — RBAC: SadServers "Buenos Aires" (Pod Crashlooping) — IN PROGRESS
+========================================================================
+
+STATUS: diagnosis complete and correct; fix written and mostly applied, but
+`kubectl auth can-i` was still returning NO at end of session. Open thread
+at the bottom.
+
+------------------------------------------------------------------------
+The scenario
+------------------------------------------------------------------------
+Two pods: logger and logshipper. logshipper is crashlooping because it's
+"forbidden to see what logger is trying to say." Constraint: do NOT edit
+the logshipper pod definition; use sudo.
+
+------------------------------------------------------------------------
+Diagnosis (read the logs — they hand you the answer)
+------------------------------------------------------------------------
+kubectl logs logshipper-... showed:
+
+    Exception when calling CoreV1Api->read_namespaced_pod_log: (403)
+    Reason: Forbidden
+    ... pods "logger-..." is forbidden: User
+    "system:serviceaccount:default:logshipper-sa" cannot get resource
+    "pods/log" in API group "" in the namespace "default"
+
+KEY READS:
+- logshipper is a Python app that calls the KUBERNETES API to read logger's
+  logs (read_namespaced_pod_log) — NOT reading a file off disk. So the bug
+  is API-layer, not filesystem. (First assumption — host file permissions —
+  was WRONG; the log corrected it. Lesson: read the output before acting.)
+- 403, not 401. 401 = "I don't know who you are" (authentication).
+  403 = "I know exactly who you are and you're not allowed" (authorization).
+  This was 403 -> identity was fine, permission was missing.
+
+------------------------------------------------------------------------
+The concept: why RBAC?
+------------------------------------------------------------------------
+- The API SERVER is the single gatekeeper for everything in the cluster.
+  Every request gets two checks:
+    1. Authentication — who are you? Workloads identify via a SERVICE
+       ACCOUNT (logshipper-sa); the token is mounted at
+       /var/run/secrets/kubernetes.io/serviceaccount
+    2. Authorization (RBAC) — are you allowed to do this? Default is DENY.
+       A new service account can do almost nothing until explicitly granted
+       (least privilege).
+- pods vs pods/log: pods/log is a SUBRESOURCE — a distinct resource for
+  permission purposes. That's WHY an account can list pods but not read
+  their logs. The error named pods/log exactly, so the grant must be
+  pods/log (one string, slash-joined), NOT logs.
+
+------------------------------------------------------------------------
+The fix (one file, two documents)
+------------------------------------------------------------------------
+A Role granting the permission + a RoleBinding tying it to the service
+account. The 403 hands you every value: verb get, resource pods/log,
+apiGroup "" (core), namespace default, subject logshipper-sa.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-role
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-role-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: logshipper-sa
+  namespace: default
+roleRef:
+  kind: Role
+  name: pod-role
+  apiGroup: rbac.authorization.k8s.io
+
+NOTES ON THE FIX:
+- Only "get" is strictly required (the 403 named the verb get). watch/list
+  are harmless extras.
+- roleRef.name MUST exactly match the Role's metadata.name (pod-role).
+
+------------------------------------------------------------------------
+Mistakes caught during the build (all name/field precision bugs)
+------------------------------------------------------------------------
+  1. Role apiVersion was wrong (apiserver.config.k8s.io/v1) -> must be the
+     RBAC group rbac.authorization.k8s.io/v1, same as the binding.
+  2. resources was ["pods","logs"] -> wrong; the 403 named pods/log
+     (subresource).
+  3. roleRef was missing its apiGroup field.
+  4. roleRef.name had a typo: pod-rol instead of pod-role -> binding pointed
+     at a non-existent Role, so it granted nothing. (Apply didn't error —
+     names are syntactically valid; K8s doesn't check the referenced Role
+     exists at bind time.) Same class of bug as the Day 11 db-vs-redis
+     service-name mismatch.
+
+------------------------------------------------------------------------
+Verify step (do this BEFORE waiting on the pod)
+------------------------------------------------------------------------
+kubectl auth can-i get pods/log --as=system:serviceaccount:default:logshipper-sa -n default
+
+Returns yes/no instantly — confirms the grant landed without waiting for pod
+recovery. The scenario's check also intentionally fails for the first ~2
+minutes while the pod state settles.
+
+------------------------------------------------------------------------
+OPEN THREAD (where the session ended)
+------------------------------------------------------------------------
+can-i still returned NO even though:
+- kubectl describe rolebinding pod-role-binding showed correct wiring
+  (Role/pod-role -> ServiceAccount/logshipper-sa in default), and
+- the file on screen showed the corrected manifest.
+
+NEXT MOVE WHEN RESUMING: verify the Role's actual cluster state (the one
+link not yet directly checked):
+
+    kubectl describe role pod-role -n default
+
+Read its Resources + Verbs. Then confirm the file actually saved (cat it,
+not just the Vim buffer) and was re-applied:
+
+    kubectl apply -f <file>      (expect "configured" or "created",
+                                  not "unchanged" or an error)
+
+The mismatch between a correct-looking file and a NO from can-i means
+something on disk/in-cluster differs from what's on screen — read state,
+don't re-read the file.
+
+
+========================================================================
+META-LESSON OF THE DAY
+========================================================================
+Diagnosed RBAC cold from a 403 — a resource type not touched before today —
+and built a near-correct manifest. Every bug that came up was a NAME/FIELD
+PRECISION error (typo in a roleRef, wrong resource string, wrong
+apiVersion), not a conceptual gap. That's exactly what real ops and the
+course test: the concepts are learnable fast; the discipline that separates
+people is READING ACTUAL STATE carefully enough to catch the one-character
+mismatch. The reflex that worked: describe the object and read the wiring
+instead of guessing.
